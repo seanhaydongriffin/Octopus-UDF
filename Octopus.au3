@@ -161,6 +161,44 @@ EndFunc
 
 
 
+; Events
+
+
+
+Func _OctopusGetEvents($event_category, $regarding = "", $environment = "")
+
+	if StringLen($regarding) > 0 Then
+
+		$regarding = "&regarding=" & $regarding
+	EndIf
+
+	if StringLen($environment) > 0 Then
+
+		$environment = "&$environments=" & $environment
+	EndIf
+
+	Local $iPID = Run('curl.exe -k -X GET -H "accept: application/json" -H "X-Octopus-ApiKey: ' & $octopus_api_key & '" ' & $octopus_domain & '/api/events?eventCategories=' & $event_category & $regarding & $environment, @ScriptDir, @SW_HIDE, $STDOUT_CHILD)
+    ProcessWaitClose($iPID)
+    $octopus_json = StdoutRead($iPID)
+;	ConsoleWrite('@@ Debug(' & @ScriptLineNumber & ') : $octopus_json = ' & $octopus_json & @CRLF & '>Error code: ' & @error & @CRLF) ;### Debug Console
+;	Exit
+
+EndFunc
+
+
+
+Func _OctopusGetDeploymentQueuedEventUsername($deployment_id)
+
+	Local $output = ""
+	_OctopusGetEvents("DeploymentQueued", $deployment_id, "")
+	Local $decoded_json = Json_Decode($octopus_json)
+	$output = Json_Get($decoded_json, '.Items[0].Username')
+	Return $output
+EndFunc
+
+
+
+
 ; Tasks
 
 
